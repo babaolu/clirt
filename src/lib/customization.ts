@@ -119,3 +119,32 @@ export type GraphicConfig = {
 	viewBox: string;
 	paths: { d: string; fillRule?: 'nonzero' | 'evenodd' }[];
 };
+
+/** Display names for the seeded presets (the seed writes these into design_preset.name). */
+export const PRESET_NAMES: Record<TextPresetSlug | GraphicPresetSlug, string> = {
+	plain: 'Plain',
+	arched: 'Arched',
+	outlined: 'Outlined',
+	stacked: 'Stacked',
+	star: 'Star',
+	heart: 'Heart',
+	lightning: 'Lightning Bolt',
+	mountains: 'Mountain Range',
+	wave: 'Wave'
+};
+export type TextPresetSlug = (typeof TEXT_PRESET_SLUGS)[number];
+export type GraphicPresetSlug = (typeof GRAPHIC_PRESET_SLUGS)[number];
+
+export const DEFAULT_PLACEMENT: Customization['placement'] = { x: 0.5, y: 0.35, scale: 1 };
+
+/** Short human summary, e.g. `Text "BABA" · Pacifico · Arched` or `Graphic: Lightning Bolt`. */
+export function describeDesign(design: Customization['design']): string {
+	if (design.kind === 'text') {
+		return `Text "${design.text}" · ${FONTS[design.font].name} · ${PRESET_NAMES[design.presetSlug]}`;
+	}
+	return `Graphic: ${PRESET_NAMES[design.presetSlug]}`;
+}
+
+export function shirtColorName(key: string): string {
+	return key in SHIRT_COLORS ? SHIRT_COLORS[key as ShirtColor].name : key;
+}
