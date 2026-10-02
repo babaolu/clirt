@@ -285,11 +285,3 @@ export function renderGraphicIcon(config: GraphicConfig, color: string): string 
 		.join('');
 	return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${escapeXml(config.viewBox)}" fill="${safeHex(color, '#111111')}" aria-hidden="true">${paths}</svg>`;
 }
-
-/** Google Fonts stylesheet URL covering every font in FONTS. */
-export function googleFontsUrl(): string {
-	const families = Object.values(FONTS)
-		.map((f) => `family=${f.google}`)
-		.join('&');
-	return `https://fonts.googleapis.com/css2?${families}&display=swap`;
-}
