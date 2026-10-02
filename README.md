@@ -1,4 +1,4 @@
-# Tee Studio
+# Clirt
 
 A customizable T-shirt shop. Customers pick a shirt style (sleeve × neck), a colour, and add their own text or a graphic, then order for delivery in Nigeria. Prices are in Naira and stored as integer kobo.
 

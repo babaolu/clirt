@@ -4,7 +4,7 @@
 	let { data } = $props();
 </script>
 
-<svelte:head><title>Customize {data.style.name} · Tee Studio</title></svelte:head>
+<svelte:head><title>Customize {data.style.name} · Clirt</title></svelte:head>
 
 <a href="/" class="text-sm text-stone-500 hover:underline">← All styles</a>
 <h1 class="mt-3 text-2xl font-bold">{data.style.name}</h1>

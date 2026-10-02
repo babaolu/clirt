@@ -22,10 +22,10 @@
 	}
 </script>
 
-<svelte:head><title>Sign in · Tee Studio</title></svelte:head>
+<svelte:head><title>Sign in · Clirt</title></svelte:head>
 
 <div class="mx-auto max-w-sm rounded-xl border border-stone-200 bg-white p-6 text-center">
-	<h1 class="text-xl font-bold">Sign in to Tee Studio</h1>
+	<h1 class="text-xl font-bold">Sign in to Clirt</h1>
 	<p class="mt-2 text-sm text-stone-600">Save your cart and track your orders.</p>
 
 	{#if !data.googleEnabled}

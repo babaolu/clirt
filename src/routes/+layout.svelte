@@ -37,13 +37,12 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>Tee Studio</title>
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col bg-stone-50 text-stone-900">
 	<header class="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
 		<div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-			<a href="/" class="text-lg font-bold tracking-tight">Tee Studio</a>
+			<a href="/" class="text-lg font-bold tracking-tight">Clirt</a>
 
 			<div class="flex items-center gap-3">
 				{#if data.user}
@@ -103,6 +102,6 @@
 	</main>
 
 	<footer class="border-t border-stone-200 py-6 text-center text-xs text-stone-500">
-		Tee Studio · Custom tees printed in Nigeria
+		Clirt · Custom tees printed in Nigeria
 	</footer>
 </div>

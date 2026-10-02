@@ -28,7 +28,8 @@ export const variables = defineEnvVars({
 		}
 	},
 	MAIL_FROM: {
-		description: 'From address for order emails, e.g. `Tee Studio <orders@example.com>`.',
+		description:
+			'From address for order emails, e.g. `Clirt <postmaster@your-sandbox-domain.mailgun.org>`.',
 		schema: optional
 	}
 });
