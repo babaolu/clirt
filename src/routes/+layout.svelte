@@ -92,6 +92,14 @@
 					]}
 				>
 					{item.label}
+					{#if item.href === '/cart' && data.cartCount > 0}
+						<span
+							class={[
+								'ml-1 rounded-full px-1.5 py-0.5 text-xs font-semibold',
+								active ? 'bg-white text-stone-900' : 'bg-stone-900 text-white'
+							]}>{data.cartCount}</span
+						>
+					{/if}
 				</a>
 			{/each}
 		</nav>
