@@ -110,6 +110,7 @@
 	</main>
 
 	<footer class="border-t border-stone-200 py-6 text-center text-xs text-stone-500">
-		Clirt · Custom tees printed in Nigeria
+		Clirt · Custom tees printed in Nigeria ·
+		<a href="/privacy" class="underline hover:text-stone-900">Privacy</a>
 	</footer>
 </div>
