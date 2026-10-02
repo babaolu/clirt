@@ -1,1 +1,144 @@
 @import 'tailwindcss';
+
+/*
+ * Clirt identity: screen-print shop meets adire indigo.
+ * Two "inks" (indigo + marigold) on cool paper; misregistered overprint is the signature.
+ */
+@theme {
+	--color-paper: #f5f7fb;
+	--color-mist: #dde3ef;
+	--color-fog: #eef1f7;
+	--color-indigo: #1f2a5c;
+	--color-indigo-soft: #3a4a8c;
+	--color-marigold: #f2b230;
+	--color-marigold-soft: #fbe7b5;
+	--color-ink: #12131a;
+	--color-slate: #545a70;
+	--color-leaf: #1e7a55;
+	--color-leaf-soft: #dcf1e7;
+	--color-alert: #c2352b;
+	--color-alert-soft: #fbe3e0;
+
+	--font-display: 'Bricolage Grotesque Variable', 'Instrument Sans Variable', system-ui, sans-serif;
+	--font-sans: 'Instrument Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: 'Space Mono', ui-monospace, monospace;
+}
+
+@layer base {
+	html {
+		color-scheme: light;
+	}
+	body {
+		@apply bg-paper font-sans text-ink antialiased;
+	}
+	h1,
+	h2,
+	h3 {
+		@apply font-display tracking-tight text-indigo;
+		font-variation-settings: 'opsz' 48;
+	}
+	:focus-visible {
+		@apply outline-2 outline-offset-2 outline-indigo;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			transition-duration: 0.01ms !important;
+			animation-duration: 0.01ms !important;
+		}
+	}
+}
+
+@layer components {
+	/* Two-ink overprint: indigo type over an offset marigold pass. */
+	.overprint {
+		text-shadow: 0.06em 0.05em 0 var(--color-marigold);
+	}
+
+	.btn {
+		@apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50;
+	}
+	.btn-primary {
+		@apply bg-indigo text-paper shadow-[3px_3px_0_var(--color-marigold)] hover:bg-indigo-soft active:translate-x-px active:translate-y-px active:shadow-[2px_2px_0_var(--color-marigold)];
+	}
+	.btn-secondary {
+		@apply border border-mist bg-white text-indigo hover:border-indigo;
+	}
+	.btn-ghost {
+		@apply text-slate hover:bg-fog hover:text-indigo;
+	}
+	.btn-danger-link {
+		@apply text-sm font-medium text-alert underline-offset-2 hover:underline;
+	}
+
+	.input {
+		@apply w-full rounded-lg border border-mist bg-white px-3 py-2.5 text-ink placeholder:text-slate/60 focus:border-indigo focus:outline-none focus-visible:outline-2 focus-visible:outline-indigo/30;
+	}
+	.input-invalid {
+		@apply border-alert;
+	}
+	.label {
+		@apply mb-1.5 block text-sm font-semibold text-indigo;
+	}
+	.field-error {
+		@apply mt-1 block text-sm text-alert;
+	}
+
+	.card {
+		@apply rounded-2xl border border-mist bg-white;
+	}
+	/* Prices use the body face: Space Mono has no ₦ glyph. */
+	.price {
+		@apply font-sans font-bold tabular-nums;
+	}
+	.spec {
+		@apply font-mono text-[0.7rem] tracking-wider text-slate uppercase;
+	}
+
+	.badge {
+		@apply inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[0.68rem] font-bold tracking-wide uppercase;
+	}
+
+	/* Choice chips: sleeve, neck, presets */
+	.chip {
+		@apply rounded-lg border border-mist bg-white px-3 py-2 text-sm font-medium text-ink transition hover:border-indigo-soft;
+	}
+	.chip[aria-pressed='true'],
+	.chip[aria-selected='true'] {
+		@apply border-indigo bg-indigo text-paper hover:border-indigo;
+	}
+
+	.swatch {
+		@apply relative rounded-full border border-black/15 transition;
+	}
+	.swatch[aria-pressed='true'] {
+		@apply ring-2 ring-indigo ring-offset-2 ring-offset-paper;
+	}
+
+	/* Print plate with registration marks at the corners */
+	.plate {
+		@apply relative rounded-2xl border border-mist bg-fog;
+		background-image: radial-gradient(
+			color-mix(in srgb, var(--color-indigo) 9%, transparent) 1px,
+			transparent 1px
+		);
+		background-size: 14px 14px;
+	}
+	.reg-mark {
+		@apply pointer-events-none absolute size-5 text-indigo/40;
+	}
+
+	.alert {
+		@apply rounded-lg border px-4 py-3 text-sm;
+	}
+	.alert-success {
+		@apply border-leaf/20 bg-leaf-soft text-leaf;
+	}
+	.alert-warning {
+		@apply border-marigold/40 bg-marigold-soft text-ink;
+	}
+	.alert-error {
+		@apply border-alert/20 bg-alert-soft text-alert;
+	}
+}

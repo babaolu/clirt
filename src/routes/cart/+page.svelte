@@ -1,57 +1,66 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { formatNaira } from '#lib/money.ts';
-	import { googleFontsUrl } from '#lib/render/shirt.ts';
 
 	let { data, form } = $props();
 
 	const hasProblems = $derived(data.lines.some((line) => line.problem));
+	const itemCount = $derived(data.lines.reduce((sum, l) => sum + l.quantity, 0));
+	let pending = $state<string | null>(null);
+
+	const track = (key: string) => () => {
+		pending = key;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			await update();
+			pending = null;
+		};
+	};
 </script>
 
-<svelte:head>
-	<title>Cart · Clirt</title>
-	<link rel="stylesheet" href={googleFontsUrl()} />
-</svelte:head>
+<svelte:head><title>Cart · Clirt</title></svelte:head>
 
-<h1 class="text-2xl font-bold">Your cart</h1>
+<h1 class="text-3xl font-extrabold">Your cart</h1>
 
 {#if data.lines.length === 0}
-	<p class="mt-6 rounded-lg border border-dashed border-stone-300 p-6 text-stone-500">
-		Your cart is empty. <a href="/" class="font-medium text-stone-900 underline">Browse styles</a>
-	</p>
+	<div class="card mt-6 flex flex-col items-start gap-4 p-8">
+		<p class="text-lg text-slate">Your cart is empty.</p>
+		<a href="/" class="btn btn-primary">Start designing</a>
+	</div>
 {:else}
 	{#if form?.message}
-		<p role="alert" class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{form.message}</p>
+		<p role="alert" class="alert alert-error mt-4">{form.message}</p>
 	{/if}
 
-	<div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-		<ul class="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white">
+	<div
+		class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-8"
+	>
+		<ul class="card divide-y divide-mist">
 			{#each data.lines as line (line.id)}
-				<li class="flex gap-4 p-4">
-					<div class="w-24 shrink-0 rounded-lg bg-stone-100 p-1 sm:w-28">
-						{@html line.previewSvg}
-					</div>
+				<li class="flex gap-4 p-4 sm:p-5">
+					<div class="plate w-24 shrink-0 rounded-xl p-1.5 sm:w-32">{@html line.previewSvg}</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-							<h2 class="font-semibold">{line.style.name}</h2>
-							<p class="font-semibold">{formatNaira(line.lineTotalKobo)}</p>
+							<h2 class="text-lg leading-snug font-bold">{line.style.name}</h2>
+							<p class="price font-bold">{formatNaira(line.lineTotalKobo)}</p>
 						</div>
-						<p class="text-sm text-stone-600">{line.colorName} · Size {line.size}</p>
-						<p class="truncate text-sm text-stone-600">{line.summary}</p>
-						<p class="text-sm text-stone-500">{formatNaira(line.unitPriceKobo)} each</p>
+						<p class="spec mt-1">{line.colorName} · Size {line.size}</p>
+						<p class="price text-sm font-normal text-slate">
+							{formatNaira(line.unitPriceKobo)} each
+						</p>
+						<p class="mt-1 truncate text-sm text-slate">{line.summary}</p>
 						{#if line.problem}
-							<p class="mt-1 text-sm text-red-700">{line.problem} Please remove it.</p>
+							<p class="mt-2 text-sm text-alert">{line.problem} Remove it to check out.</p>
 						{/if}
 
-						<div class="mt-3 flex flex-wrap items-center gap-3">
+						<div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
 							<form
 								method="POST"
 								action="?/updateQuantity"
-								use:enhance
+								use:enhance={track(`qty-${line.id}`)}
 								class="flex items-center gap-2"
 							>
 								<input type="hidden" name="id" value={line.id} />
-								<label class="sr-only" for={`qty-${line.id}`}>Quantity</label>
+								<label class="sr-only" for={`qty-${line.id}`}>Quantity for {line.style.name}</label>
 								<input
 									id={`qty-${line.id}`}
 									type="number"
@@ -59,18 +68,21 @@
 									min="1"
 									max="20"
 									value={line.quantity}
-									class="w-20 rounded-md border border-stone-300 px-2 py-1"
+									class="input w-20 py-1.5"
 								/>
-								<button
-									type="submit"
-									class="rounded-md border border-stone-300 px-3 py-1 text-sm hover:bg-stone-50"
-								>
-									Update
+								<button type="submit" disabled={pending !== null} class="btn btn-secondary py-1.5">
+									{pending === `qty-${line.id}` ? 'Updating…' : 'Update'}
 								</button>
 							</form>
-							<form method="POST" action="?/remove" use:enhance>
+							<form method="POST" action="?/remove" use:enhance={track(`rm-${line.id}`)}>
 								<input type="hidden" name="id" value={line.id} />
-								<button type="submit" class="text-sm text-red-700 hover:underline">Remove</button>
+								<button
+									type="submit"
+									disabled={pending !== null}
+									class="btn-danger-link disabled:opacity-50"
+								>
+									{pending === `rm-${line.id}` ? 'Removing…' : 'Remove'}
+								</button>
 							</form>
 						</div>
 					</div>
@@ -78,25 +90,29 @@
 			{/each}
 		</ul>
 
-		<aside class="h-fit rounded-xl border border-stone-200 bg-white p-5">
-			<div class="flex justify-between">
-				<span class="text-stone-600">Subtotal</span>
-				<span class="font-semibold">{formatNaira(data.subtotalKobo)}</span>
-			</div>
-			<p class="mt-1 text-xs text-stone-500">Delivery is free. You pay on delivery.</p>
+		<aside class="card h-fit space-y-4 p-5 lg:sticky lg:top-24">
+			<h2 class="text-lg font-bold">Summary</h2>
+			<dl class="space-y-2 text-sm">
+				<div class="flex justify-between">
+					<dt class="text-slate">Items</dt>
+					<dd class="price">{itemCount}</dd>
+				</div>
+				<div class="flex justify-between">
+					<dt class="text-slate">Delivery</dt>
+					<dd>Free</dd>
+				</div>
+				<div class="flex justify-between border-t border-mist pt-3 text-base font-bold">
+					<dt>Subtotal</dt>
+					<dd class="price">{formatNaira(data.subtotalKobo)}</dd>
+				</div>
+			</dl>
+			<p class="text-xs text-slate">You pay on delivery. Nothing is charged online.</p>
 			{#if hasProblems}
-				<p class="mt-4 text-sm text-red-700">Remove unavailable items to continue.</p>
+				<p class="text-sm text-alert">Remove unavailable items to continue.</p>
 			{:else}
-				<a
-					href="/checkout"
-					class="mt-4 block rounded-md bg-stone-900 px-4 py-3 text-center font-semibold text-white hover:bg-stone-700"
-				>
-					Proceed to checkout
-				</a>
+				<a href="/checkout" class="btn btn-primary w-full py-3 text-base">Proceed to checkout</a>
 			{/if}
-			<a href="/" class="mt-3 block text-center text-sm text-stone-600 hover:underline"
-				>Keep shopping</a
-			>
+			<a href="/" class="btn btn-ghost w-full">Keep shopping</a>
 		</aside>
 	</div>
 {/if}

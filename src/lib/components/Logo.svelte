@@ -1,0 +1,21 @@
+<script lang="ts">
+	let { class: className = '' }: { class?: string } = $props();
+</script>
+
+<span class={['inline-flex items-center gap-2', className]}>
+	<svg viewBox="0 0 64 64" class="size-7" aria-hidden="true">
+		<rect width="64" height="64" rx="14" fill="var(--color-indigo)" />
+		<path
+			d="M24 15 L14 20 L10 31 L18 34 L19 50 L47 50 L48 34 L56 31 L52 20 L42 15 Q35 22 24 15 Z"
+			fill="var(--color-marigold)"
+			transform="translate(3 3)"
+		/>
+		<path
+			d="M24 15 L14 20 L10 31 L18 34 L19 50 L47 50 L48 34 L56 31 L52 20 L42 15 Q35 22 24 15 Z"
+			fill="var(--color-paper)"
+		/>
+	</svg>
+	<span class="overprint font-display text-2xl font-extrabold tracking-tight text-indigo"
+		>clirt</span
+	>
+</span>

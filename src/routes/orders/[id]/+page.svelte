@@ -2,7 +2,6 @@
 	import { enhance } from '$app/forms';
 	import { formatNaira } from '#lib/money.ts';
 	import { EMAIL_STATUS, ORDER_STATUS, formatOrderDate, orderNumber } from '#lib/order-status.ts';
-	import { googleFontsUrl } from '#lib/render/shirt.ts';
 
 	let { data, form } = $props();
 
@@ -10,44 +9,35 @@
 	const order = $derived(data.order);
 </script>
 
-<svelte:head>
-	<title>Order #{orderNumber(order.id)} · Clirt</title>
-	<link rel="stylesheet" href={googleFontsUrl()} />
-</svelte:head>
+<svelte:head><title>Order #{orderNumber(order.id)} · Clirt</title></svelte:head>
 
-<a href="/orders" class="text-sm text-stone-500 hover:underline">← My orders</a>
+<a href="/orders" class="text-sm text-slate hover:text-indigo">← My orders</a>
 
 {#if data.placed}
 	{#if order.emailStatus === 'sent'}
-		<p role="status" class="mt-4 rounded-md bg-emerald-50 p-4 text-emerald-800">
+		<p role="status" class="alert alert-success mt-4 text-base">
 			Order placed. Confirmation sent to <strong>{order.contactEmail}</strong>.
 		</p>
 	{:else}
-		<p role="status" class="mt-4 rounded-md bg-amber-50 p-4 text-amber-900">
+		<p role="status" class="alert alert-warning mt-4 text-base">
 			Order placed. We couldn't send the confirmation email.
 		</p>
 	{/if}
 {/if}
 
-<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+<div class="mt-4 flex flex-wrap items-end justify-between gap-3">
 	<div>
-		<h1 class="text-2xl font-bold">Order #{orderNumber(order.id)}</h1>
-		<p class="text-sm text-stone-500">Placed {formatOrderDate(order.createdAt)}</p>
+		<p class="spec">Order</p>
+		<h1 class="font-mono text-3xl font-bold">#{orderNumber(order.id)}</h1>
+		<p class="text-sm text-slate">Placed {formatOrderDate(order.createdAt)}</p>
 	</div>
 	<div class="flex flex-wrap gap-2">
-		<span
-			class={['rounded-full px-2.5 py-1 text-xs font-medium', ORDER_STATUS[order.status].class]}
+		<span class={['badge', ORDER_STATUS[order.status].class]}
+			>{ORDER_STATUS[order.status].label}</span
 		>
-			{ORDER_STATUS[order.status].label}
-		</span>
-		<span
-			class={[
-				'rounded-full px-2.5 py-1 text-xs font-medium',
-				EMAIL_STATUS[order.emailStatus].class
-			]}
+		<span class={['badge', EMAIL_STATUS[order.emailStatus].class]}
+			>{EMAIL_STATUS[order.emailStatus].label}</span
 		>
-			{EMAIL_STATUS[order.emailStatus].label}
-		</span>
 	</div>
 </div>
 
@@ -55,7 +45,7 @@
 	<form
 		method="POST"
 		action="?/resendEmail"
-		class="mt-4 flex flex-wrap items-center gap-3"
+		class="mt-4"
 		use:enhance={() => {
 			resending = true;
 			return async ({ update }) => {
@@ -64,74 +54,68 @@
 			};
 		}}
 	>
-		<button
-			type="submit"
-			disabled={resending}
-			class="rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium hover:bg-stone-50 disabled:opacity-50"
-		>
+		<button type="submit" disabled={resending} class="btn btn-secondary">
 			{resending ? 'Sending…' : 'Resend confirmation email'}
 		</button>
 	</form>
 {/if}
 {#if form?.message}
-	<p role="status" class={['mt-3 text-sm', form.resent ? 'text-emerald-700' : 'text-red-700']}>
+	<p role="status" class={['mt-3 text-sm', form.resent ? 'text-leaf' : 'text-alert']}>
 		{form.message}
 	</p>
 {/if}
 
-<div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-	<ul class="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white">
+<div class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-8">
+	<ul class="card divide-y divide-mist">
 		{#each data.items as item (item.id)}
-			<li class="flex gap-4 p-4">
-				<div class="w-24 shrink-0 rounded-lg bg-stone-100 p-1 sm:w-28">
+			<li class="flex gap-4 p-4 sm:p-5">
+				<div class="plate w-24 shrink-0 rounded-xl p-1.5 sm:w-32">
 					{#if item.previewSvg}{@html item.previewSvg}{/if}
 				</div>
 				<div class="min-w-0 flex-1">
-					<div class="flex flex-wrap items-start justify-between gap-x-4">
-						<h2 class="font-semibold">{item.styleName}</h2>
-						<p class="font-semibold">{formatNaira(item.unitPriceKobo * item.quantity)}</p>
+					<div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+						<h2 class="text-lg leading-snug font-bold">{item.styleName}</h2>
+						<p class="price font-bold">{formatNaira(item.unitPriceKobo * item.quantity)}</p>
 					</div>
-					<p class="text-sm text-stone-600">
-						{item.colorName} · Size {item.size} · ×{item.quantity}
-					</p>
-					<p class="truncate text-sm text-stone-600">{item.summary}</p>
-					<p class="text-sm text-stone-500">{formatNaira(item.unitPriceKobo)} each</p>
+					<p class="spec mt-1">{item.colorName} · Size {item.size} · ×{item.quantity}</p>
+					<p class="price text-sm font-normal text-slate">{formatNaira(item.unitPriceKobo)} each</p>
+					<p class="mt-1 truncate text-sm text-slate">{item.summary}</p>
 				</div>
 			</li>
 		{/each}
 	</ul>
 
-	<aside class="h-fit space-y-5 rounded-xl border border-stone-200 bg-white p-5 text-sm">
-		<dl class="space-y-1">
+	<aside class="card h-fit space-y-5 p-5 text-sm">
+		<dl class="space-y-2">
 			<div class="flex justify-between">
-				<dt class="text-stone-600">Subtotal</dt>
-				<dd>{formatNaira(order.subtotalKobo)}</dd>
+				<dt class="text-slate">Subtotal</dt>
+				<dd class="price">{formatNaira(order.subtotalKobo)}</dd>
 			</div>
 			<div class="flex justify-between">
-				<dt class="text-stone-600">Delivery</dt>
+				<dt class="text-slate">Delivery</dt>
 				<dd>Free</dd>
 			</div>
-			<div class="flex justify-between text-base font-semibold">
+			<div class="flex justify-between border-t border-mist pt-3 text-base font-bold">
 				<dt>Total</dt>
-				<dd>{formatNaira(order.totalKobo)}</dd>
+				<dd class="price">{formatNaira(order.totalKobo)}</dd>
 			</div>
 		</dl>
-		<p class="rounded-md bg-amber-50 p-2 text-amber-900">Pay on delivery</p>
+		<p class="alert alert-warning">Pay on delivery</p>
 		<div>
-			<h2 class="font-semibold">Delivering to</h2>
-			<p class="mt-1 text-stone-600">
+			<h2 class="text-base font-bold">Delivering to</h2>
+			<p class="mt-1 text-slate">
 				{order.shippingName}<br />{order.address}<br />{order.city}, {order.state}<br
 				/>{order.phone}
 			</p>
 		</div>
 		<div>
-			<h2 class="font-semibold">Contact</h2>
-			<p class="mt-1 text-stone-600">{order.contactEmail}</p>
+			<h2 class="text-base font-bold">Contact</h2>
+			<p class="mt-1 break-all text-slate">{order.contactEmail}</p>
 		</div>
 		{#if order.notes}
 			<div>
-				<h2 class="font-semibold">Notes</h2>
-				<p class="mt-1 whitespace-pre-line text-stone-600">{order.notes}</p>
+				<h2 class="text-base font-bold">Notes</h2>
+				<p class="mt-1 whitespace-pre-line text-slate">{order.notes}</p>
 			</div>
 		{/if}
 	</aside>

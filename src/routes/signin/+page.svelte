@@ -24,17 +24,17 @@
 
 <svelte:head><title>Sign in · Clirt</title></svelte:head>
 
-<div class="mx-auto max-w-sm rounded-xl border border-stone-200 bg-white p-6 text-center">
-	<h1 class="text-xl font-bold">Sign in to Clirt</h1>
-	<p class="mt-2 text-sm text-stone-600">Save your cart and track your orders.</p>
+<div class="card relative mx-auto mt-4 max-w-sm p-8 text-center sm:mt-10">
+	<h1 class="overprint text-3xl font-extrabold">Sign in to Clirt</h1>
+	<p class="mt-2 text-slate">Save your cart and track your orders.</p>
 
 	{#if !data.googleEnabled}
-		<p role="alert" class="mt-6 rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+		<p role="alert" class="alert alert-warning mt-6 text-left">
 			Sign-in is not available right now: Google sign-in has not been configured on this server.
 		</p>
 	{:else}
 		{#if data.error || clientError}
-			<p role="alert" class="mt-6 rounded-md bg-red-50 p-3 text-sm text-red-700">
+			<p role="alert" class="alert alert-error mt-6 text-left">
 				{clientError ?? 'Google sign-in did not complete. Please try again.'}
 			</p>
 		{/if}
@@ -43,7 +43,7 @@
 			type="button"
 			onclick={continueWithGoogle}
 			disabled={pending}
-			class="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-stone-300 bg-white px-4 py-2.5 font-medium hover:bg-stone-50 disabled:opacity-60"
+			class="btn btn-secondary mt-6 w-full py-3 text-base"
 		>
 			<svg viewBox="0 0 48 48" class="size-5" aria-hidden="true">
 				<path
@@ -66,4 +66,10 @@
 			{pending ? 'Redirecting…' : 'Continue with Google'}
 		</button>
 	{/if}
+	<p class="mt-6 text-xs text-slate">
+		We only receive your name, email address and profile picture. <a
+			href="/privacy"
+			class="underline hover:text-indigo">Privacy policy</a
+		>
+	</p>
 </div>
