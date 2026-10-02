@@ -58,6 +58,16 @@
 			{resending ? 'Sending…' : 'Resend confirmation email'}
 		</button>
 	</form>
+	{#if order.emailError}
+		<details class="mt-3 max-w-2xl text-sm text-slate">
+			<summary class="w-fit cursor-pointer select-none hover:text-indigo">Details</summary>
+			<p
+				class="mt-2 rounded-lg border border-mist bg-fog px-3 py-2 font-mono text-xs break-words whitespace-pre-wrap"
+			>
+				{order.emailError}
+			</p>
+		</details>
+	{/if}
 {/if}
 {#if form?.message}
 	<p role="status" class={['mt-3 text-sm', form.resent ? 'text-leaf' : 'text-alert']}>

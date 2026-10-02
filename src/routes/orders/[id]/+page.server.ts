@@ -25,7 +25,9 @@ export const load: PageServerLoad = async (event) => {
 			city: order.city,
 			state: order.state,
 			notes: order.notes,
-			emailStatus: order.emailStatus
+			emailStatus: order.emailStatus,
+			// Only the order's owner reaches this load; shown to help diagnose failed confirmations.
+			emailError: order.emailStatus === 'failed' ? order.emailError : null
 		},
 		items: items.map((item) => ({
 			id: item.id,

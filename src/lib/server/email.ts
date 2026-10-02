@@ -32,6 +32,13 @@ export async function sendOrderConfirmation(
 			error: 'Email is not configured (MAILGUN_API_KEY, MAILGUN_DOMAIN and MAIL_FROM are required).'
 		};
 	}
+	// Catch malformed senders (e.g. a missing closing ">") before Mailgun rejects them with a vague 400.
+	if (!/^(?:[^<>]+<[^<>\s@]+@[^<>\s@]+>|[^<>\s@]+@[^<>\s@]+)$/.test(MAIL_FROM.trim())) {
+		return {
+			ok: false,
+			error: 'MAIL_FROM is not a valid sender. Use the form "Clirt <postmaster@your-domain>".'
+		};
+	}
 
 	const origin = (BETTER_AUTH_URL ?? fallbackOrigin ?? '').replace(/\/$/, '');
 	const orderUrl = `${origin}/orders/${order.id}`;
