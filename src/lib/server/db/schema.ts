@@ -80,7 +80,7 @@ export const orders = pgTable(
 		id: uuid('id').primaryKey().defaultRandom(),
 		userId: text('user_id')
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: 'cascade' }), // account deletion removes orders too
 		status: orderStatusEnum('status').notNull().default('pending'),
 		subtotalKobo: integer('subtotal_kobo').notNull(),
 		totalKobo: integer('total_kobo').notNull(),

@@ -1,61 +1,31 @@
 import { error, fail } from '@sveltejs/kit';
 import { requireUser } from '#lib/server/auth-guard.ts';
-import { deliverOrderEmail, getUserOrder } from '#lib/server/orders.ts';
-import { describeDesign, shirtColorName } from '#lib/customization.ts';
+import { getOrder, resendOrderEmail } from '#lib/server/services/orders.ts';
+import { ServiceError } from '#lib/server/services/errors.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const user = requireUser(event);
-	const found = await getUserOrder(event.params.id, user.id);
-	if (!found) error(404, 'Order not found');
-
-	const { order, items } = found;
-	return {
-		placed: event.url.searchParams.get('placed') === '1',
-		order: {
-			id: order.id,
-			createdAt: order.createdAt,
-			status: order.status,
-			subtotalKobo: order.subtotalKobo,
-			totalKobo: order.totalKobo,
-			contactEmail: order.contactEmail,
-			shippingName: order.shippingName,
-			phone: order.phone,
-			address: order.address,
-			city: order.city,
-			state: order.state,
-			notes: order.notes,
-			emailStatus: order.emailStatus,
-			// Only the order's owner reaches this load; shown to help diagnose failed confirmations.
-			emailError: order.emailStatus === 'failed' ? order.emailError : null
-		},
-		items: items.map((item) => ({
-			id: item.id,
-			styleName: item.styleName,
-			size: item.size,
-			quantity: item.quantity,
-			unitPriceKobo: item.unitPriceKobo,
-			colorName: shirtColorName(item.customization.shirtColor),
-			summary: describeDesign(item.customization.design),
-			previewSvg: item.previewSvg
-		}))
-	};
+	try {
+		const { items, ...order } = await getOrder(user.id, event.params.id);
+		return { placed: event.url.searchParams.get('placed') === '1', order, items };
+	} catch (err) {
+		if (err instanceof ServiceError && err.status === 404) error(404, 'Order not found');
+		throw err;
+	}
 };
 
 export const actions: Actions = {
 	resendEmail: async (event) => {
 		const user = requireUser(event);
-		const found = await getUserOrder(event.params.id, user.id);
-		if (!found) error(404, 'Order not found');
-		if (found.order.emailStatus === 'sent')
-			return { resent: false, message: 'The confirmation email was already sent.' };
-
-		const result = await deliverOrderEmail(found.order.id, user.id, event.url.origin);
-		if (!result.ok)
-			return fail(502, {
-				resent: false,
-				message: "We couldn't send the email. Please try again later."
-			});
-		return { resent: true, message: `Confirmation sent to ${found.order.contactEmail}.` };
+		try {
+			const { contactEmail } = await resendOrderEmail(user.id, event.params.id, event.url.origin);
+			return { resent: true, message: `Confirmation sent to ${contactEmail}.` };
+		} catch (err) {
+			if (!(err instanceof ServiceError)) throw err;
+			if (err.status === 404) error(404, 'Order not found');
+			if (err.code === 'already_sent') return { resent: false, message: err.message };
+			return fail(err.status, { resent: false, message: err.message });
+		}
 	}
 };

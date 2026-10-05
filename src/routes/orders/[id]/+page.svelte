@@ -89,7 +89,7 @@
 					</div>
 					<p class="spec mt-1">{item.colorName} · Size {item.size} · ×{item.quantity}</p>
 					<p class="price text-sm font-normal text-slate">{formatNaira(item.unitPriceKobo)} each</p>
-					<p class="mt-1 truncate text-sm text-slate">{item.summary}</p>
+					<p class="mt-1 truncate text-sm text-slate">{item.designSummary}</p>
 				</div>
 			</li>
 		{/each}

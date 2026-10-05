@@ -1,7 +1,8 @@
-import { cartQuantity } from '#lib/server/catalog.ts';
+import { cartQuantity } from '#lib/server/services/cart.ts';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, depends }) => {
+	depends('app:cart'); // re-run when a cart-updated event arrives
 	const user = locals.user;
 	return {
 		user: user
