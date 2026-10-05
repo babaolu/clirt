@@ -54,6 +54,12 @@
 	/>
 </svelte:head>
 
+{#if data.accountDeleted}
+	<p role="status" class="alert alert-success mb-8">
+		Your account and all its data have been deleted.
+	</p>
+{/if}
+
 <section class="grid items-center gap-10 pb-14 md:grid-cols-[1.05fr_1fr] md:gap-12 md:pb-20">
 	<div>
 		<p class="spec">Custom tees · Printed in Nigeria · Pay on delivery</p>
