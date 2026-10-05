@@ -31,5 +31,22 @@ export const variables = defineEnvVars({
 		description:
 			'From address for order emails, e.g. `Clirt <postmaster@your-sandbox-domain.mailgun.org>`.',
 		schema: optional
+	},
+	PUSHER_APP_ID: { description: 'Pusher Channels app id (server only).', schema: optional },
+	PUSHER_SECRET: { description: 'Pusher Channels secret (server only).', schema: optional },
+	PUSHER_KEY: {
+		description: 'Pusher Channels key. Public: the browser uses it to subscribe.',
+		public: true,
+		schema: optional
+	},
+	PUSHER_CLUSTER: {
+		description: 'Pusher Channels cluster, e.g. `eu`. Public.',
+		public: true,
+		schema: optional
+	},
+	EXPO_DEV_ORIGINS: {
+		description:
+			'Set to `true` to trust Expo Go origins (exp://…) for mobile sign-in outside local dev. Off by default: Better Auth hands the session to trusted deep links.',
+		schema: (value) => optional(value) === 'true'
 	}
 });
