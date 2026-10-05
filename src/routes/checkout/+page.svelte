@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { formatNaira } from '#lib/money.ts';
 	import { NIGERIAN_STATES } from '#lib/nigeria.ts';
+	import { liveSync } from '#lib/live-sync.svelte.ts';
 
 	let { data, form } = $props();
 
@@ -33,9 +34,14 @@
 		class="space-y-6"
 		use:enhance={() => {
 			submitting = true;
+			liveSync.paused++; // placing the order empties the cart; don't reload /checkout mid-submit
 			return async ({ update }) => {
-				await update({ reset: false });
-				submitting = false;
+				try {
+					await update({ reset: false });
+				} finally {
+					submitting = false;
+					liveSync.paused--;
+				}
 			};
 		}}
 	>

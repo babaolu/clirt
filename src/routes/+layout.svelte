@@ -14,8 +14,10 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import Logo from '#lib/components/Logo.svelte';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
+	import { PUSHER_CLUSTER, PUSHER_KEY } from '$app/env/public';
 	import { authClient } from '#lib/auth-client.ts';
+	import { liveSync } from '#lib/live-sync.svelte.ts';
 
 	let { data, children } = $props();
 
@@ -44,6 +46,59 @@
 			.join('')
 			.toUpperCase()
 	);
+	// ---- Live cart sync (Pusher). Without PUSHER_* the site just works without live updates. ----
+	// The event's count shows instantly; fresh server data (after invalidate) replaces it.
+	let liveCount = $state<number | null>(null);
+	$effect(() => {
+		void data.cartCount;
+		liveCount = null;
+	});
+	const cartCount = $derived(liveCount ?? data.cartCount);
+
+	const refreshCart = () => {
+		if (liveSync.paused === 0) invalidate('app:cart');
+	};
+
+	$effect(() => {
+		const userId = data.user?.id;
+		if (!userId || !PUSHER_KEY || !PUSHER_CLUSTER) return;
+		let disposed = false;
+		let pusher: import('pusher-js').default | undefined;
+		import('pusher-js')
+			.then(({ default: Pusher }) => {
+				if (disposed) return;
+				pusher = new Pusher(PUSHER_KEY!, {
+					cluster: PUSHER_CLUSTER!,
+					channelAuthorization: { endpoint: '/api/v1/realtime/auth', transport: 'ajax' }
+				});
+				pusher
+					.subscribe(`private-user-${userId}`)
+					.bind('cart-updated', (event: { itemCount?: number }) => {
+						if (typeof event?.itemCount === 'number') liveCount = event.itemCount;
+						refreshCart();
+					});
+			})
+			.catch((err) => console.warn('Live cart sync unavailable:', err));
+		return () => {
+			disposed = true;
+			pusher?.disconnect();
+		};
+	});
+
+	// Safety net for missed events (sleeping laptop, flaky network): refresh when the tab comes back.
+	$effect(() => {
+		if (!data.user) return;
+		const onVisible = () => {
+			if (document.visibilityState === 'visible') refreshCart();
+		};
+		window.addEventListener('focus', refreshCart);
+		document.addEventListener('visibilitychange', onVisible);
+		return () => {
+			window.removeEventListener('focus', refreshCart);
+			document.removeEventListener('visibilitychange', onVisible);
+		};
+	});
+
 	const isActive = (href: string) =>
 		href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href);
 </script>
@@ -92,27 +147,29 @@
 						/>
 					</svg>
 					<span class="max-sm:sr-only">Cart</span>
-					{#if data.cartCount > 0}
-						<span class="badge bg-marigold text-ink" aria-label={`${data.cartCount} items`}
-							>{data.cartCount}</span
+					{#if cartCount > 0}
+						<span class="badge bg-marigold text-ink" aria-label={`${cartCount} items`}
+							>{cartCount}</span
 						>
 					{/if}
 				</a>
 
 				{#if data.user}
-					{#if data.user.image}
-						<img
-							src={data.user.image}
-							alt=""
-							class="size-8 rounded-full ring-2 ring-mist"
-							referrerpolicy="no-referrer"
-						/>
-					{:else}
-						<span
-							class="grid size-8 place-items-center rounded-full bg-indigo font-mono text-xs font-bold text-paper"
-							aria-hidden="true">{initials}</span
-						>
-					{/if}
+					<a href="/account" aria-label="Your account" title="Your account" class="rounded-full">
+						{#if data.user.image}
+							<img
+								src={data.user.image}
+								alt=""
+								class="size-8 rounded-full ring-2 ring-mist hover:ring-indigo"
+								referrerpolicy="no-referrer"
+							/>
+						{:else}
+							<span
+								class="grid size-8 place-items-center rounded-full bg-indigo font-mono text-xs font-bold text-paper"
+								aria-hidden="true">{initials}</span
+							>
+						{/if}
+					</a>
 					<button
 						type="button"
 						onclick={signOut}
